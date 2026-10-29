@@ -1,0 +1,23 @@
+# Render Blueprint for the VoltBharat API. Not applied automatically:
+# create it from the Render dashboard (New > Blueprint) when you decide to deploy.
+services:
+  - type: web
+    name: voltbharat-api
+    runtime: python
+    plan: free
+    region: singapore
+    rootDir: .
+    buildCommand: pip install -r backend/requirements.txt
+    startCommand: uvicorn app.main:app --app-dir backend --host 0.0.0.0 --port $PORT --proxy-headers
+    healthCheckPath: /health
+    envVars:
+      - key: PYTHON_VERSION
+        value: "3.13.5"
+      - key: DATABASE_URL          # Neon connection string, set in the dashboard (never committed)
+        sync: false
+      - key: CORS_ORIGINS          # e.g. https://voltbharat.vercel.app
+        sync: false
+      - key: CACHE_TTL_SECONDS
+        value: "600"
+      - key: LOG_LEVEL
+        value: INFO

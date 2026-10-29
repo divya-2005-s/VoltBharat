@@ -1,0 +1,135 @@
+@import 'tailwindcss';
+@import '@fontsource-variable/inter';
+
+@custom-variant dark (&:where(.dark, .dark *));
+
+/* ---------------------------------------------------------------- tokens */
+:root {
+  color-scheme: light;
+  --bg: #f6f7f9;
+  --surface: #ffffff;
+  --surface-2: #f3f4f6;
+  --border: #e5e7eb;
+  --border-strong: #d1d5db;
+  --text: #0b1220;
+  --text-2: #4b5563;
+  --text-3: #6b7280;
+  --accent: #10b981;          /* brand electric green: fills, focus, highlights */
+  --accent-ink: #047857;      /* green text that passes 4.5:1 on white */
+  --accent-soft: #ecfdf5;
+  --sidebar: #0b1426;
+  --sidebar-2: #13203a;
+  --sidebar-text: #c7d2e3;
+  --sidebar-muted: #7d8aa3;
+  --warn: #b45309;
+  --warn-soft: #fffbeb;
+  --warn-border: #fcd34d;
+  --danger: #b91c1c;
+  --danger-soft: #fef2f2;
+  --info-soft: #eff6ff;
+  --info-border: #bfdbfe;
+
+  /* chart roles (validated palette, light) */
+  --series-1: #059669;
+  --series-2: #2a78d6;
+  --series-3: #eb6834;
+  --series-4: #6250d6;
+  --series-other: #9ca3af;
+  --chart-grid: #eef0f3;
+  --chart-axis: #9ca3af;
+  --status-warning: #fab219;
+  --status-critical: #d03b3b;
+  --status-neutral: #9ca3af;
+}
+
+.dark {
+  color-scheme: dark;
+  --bg: #0a0f1c;
+  --surface: #111827;
+  --surface-2: #172033;
+  --border: #1f2a3d;
+  --border-strong: #2d3b55;
+  --text: #f3f4f6;
+  --text-2: #b6c0d1;
+  --text-3: #8b97ab;
+  --accent: #10b981;
+  --accent-ink: #34d399;
+  --accent-soft: #0d2a24;
+  --sidebar: #070d1a;
+  --sidebar-2: #101a2e;
+  --sidebar-text: #c7d2e3;
+  --sidebar-muted: #6f7c94;
+  --warn: #fbbf24;
+  --warn-soft: #2a1f08;
+  --warn-border: #6b4e0f;
+  --danger: #f87171;
+  --danger-soft: #2a1111;
+  --info-soft: #0f1d33;
+  --info-border: #1e3a5f;
+
+  --series-1: #0ea371;
+  --series-2: #3987e5;
+  --series-3: #d95926;
+  --series-4: #9085e9;
+  --series-other: #6b7280;
+  --chart-grid: #1c2638;
+  --chart-axis: #6b7280;
+}
+
+@theme inline {
+  --font-sans: 'Inter Variable', ui-sans-serif, system-ui, sans-serif;
+  --color-bg: var(--bg);
+  --color-surface: var(--surface);
+  --color-surface-2: var(--surface-2);
+  --color-border: var(--border);
+  --color-border-strong: var(--border-strong);
+  --color-ink: var(--text);
+  --color-ink-2: var(--text-2);
+  --color-ink-3: var(--text-3);
+  --color-accent: var(--accent);
+  --color-accent-ink: var(--accent-ink);
+  --color-accent-soft: var(--accent-soft);
+  --color-sidebar: var(--sidebar);
+  --color-sidebar-2: var(--sidebar-2);
+  --color-sidebar-text: var(--sidebar-text);
+  --color-sidebar-muted: var(--sidebar-muted);
+  --color-warn: var(--warn);
+  --color-warn-soft: var(--warn-soft);
+  --color-warn-border: var(--warn-border);
+  --color-danger: var(--danger);
+  --color-danger-soft: var(--danger-soft);
+  --color-info-soft: var(--info-soft);
+  --color-info-border: var(--info-border);
+}
+
+html,
+body,
+#root {
+  height: 100%;
+}
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font-sans);
+  font-feature-settings: 'cv11', 'ss01';
+  -webkit-font-smoothing: antialiased;
+}
+
+.tabular {
+  font-variant-numeric: tabular-nums;
+}
+
+:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    transition-duration: 0.01ms !important;
+    animation-duration: 0.01ms !important;
+  }
+}

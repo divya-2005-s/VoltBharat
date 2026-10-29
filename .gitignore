@@ -1,0 +1,63 @@
+# Secrets
+.env
+.env.*
+!.env.example
+frontend/.env
+frontend/.env.*
+!frontend/.env.example
+
+# Python
+.venv/
+venv/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.ipynb_checkpoints/
+*.egg-info/
+
+# Node / frontend
+node_modules/
+frontend/dist/
+frontend/coverage/
+frontend/test-results/
+frontend/playwright-report/
+
+# Raw datasets (never commit) and generated data
+data/*.csv
+data/raw/
+data/processed/
+data/reference/_geo_source/
+exports/
+logs/
+*.duckdb
+*.duckdb.wal
+
+# OS / editors
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+
+# Additional local secrets and credentials
+.env.local
+.env.production
+*.pem
+*.key
+secrets/
+credentials/
+
+# Python generated files
+.coverage
+htmlcov/
+.mypy_cache/
+.ruff_cache/
+
+# Build and generated reports
+build/
+dist/
+*.log
+
+# Exclude local datasets and database files
+/data/
+*.duckdb
+*.duckdb.wal

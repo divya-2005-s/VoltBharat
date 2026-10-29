@@ -1,0 +1,24 @@
+# Local development database for VoltBharat.
+# Port 5433 on the host so it never conflicts with a locally installed PostgreSQL on 5432.
+# Credentials come from .env (POSTGRES_PASSWORD); see .env.example.
+services:
+  db:
+    image: postgres:17.6
+    container_name: voltbharat-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: voltbharat
+      POSTGRES_USER: voltbharat
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD in .env}
+    ports:
+      - "127.0.0.1:5433:5432"
+    volumes:
+      - voltbharat_pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U voltbharat -d voltbharat"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+
+volumes:
+  voltbharat_pgdata:

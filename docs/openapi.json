@@ -1,0 +1,3790 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "VoltBharat API",
+    "description": "India EV adoption and charging-gap analytics. All figures come from the VoltBharat PostgreSQL database built by the ETL pipeline; nothing is fabricated when data is missing.",
+    "version": "1.0.0"
+  },
+  "paths": {
+    "/api/v1/overview": {
+      "get": {
+        "tags": [
+          "overview"
+        ],
+        "summary": "Executive KPIs, trend, map and top states",
+        "operationId": "get_overview_api_v1_overview_get",
+        "parameters": [
+          {
+            "name": "start",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "pattern": "^\\d{4}-(0[1-9]|1[0-2])$"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "First month, YYYY-MM (default: first available)",
+              "examples": [
+                "2024-01"
+              ],
+              "title": "Start"
+            },
+            "description": "First month, YYYY-MM (default: first available)"
+          },
+          {
+            "name": "end",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "pattern": "^\\d{4}-(0[1-9]|1[0-2])$"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Last month, YYYY-MM (default: latest available)",
+              "examples": [
+                "2026-09"
+              ],
+              "title": "End"
+            },
+            "description": "Last month, YYYY-MM (default: latest available)"
+          },
+          {
+            "name": "state",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "maxLength": 80
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "State/UT name (case-insensitive), e.g. Karnataka",
+              "title": "State"
+            },
+            "description": "State/UT name (case-insensitive), e.g. Karnataka"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Envelope_Overview_"
+                }
+              }
+            }
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Unprocessable Content"
+          },
+          "503": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Service Unavailable"
+          }
+        }
+      }
+    },
+    "/api/v1/trend": {
+      "get": {
+        "tags": [
+          "trends"
+        ],
+        "summary": "EV registration time series",
+        "operationId": "get_trend_api_v1_trend_get",
+        "parameters": [
+          {
+            "name": "granularity",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "enum": [
+                "month",
+                "fy",
+                "year"
+              ],
+              "type": "string",
+              "default": "month",
+              "title": "Granularity"
+            }
+          },
+          {
+            "name": "start",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "pattern": "^\\d{4}-(0[1-9]|1[0-2])$"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "First month, YYYY-MM (default: first available)",
+              "examples": [
+                "2024-01"
+              ],
+              "title": "Start"
+            },
+            "description": "First month, YYYY-MM (default: first available)"
+          },
+          {
+            "name": "end",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "pattern": "^\\d{4}-(0[1-9]|1[0-2])$"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Last month, YYYY-MM (default: latest available)",
+              "examples": [
+                "2026-09"
+              ],
+              "title": "End"
+            },
+            "description": "Last month, YYYY-MM (default: latest available)"
+          },
+          {
+            "name": "state",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "maxLength": 80
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "State/UT name (case-insensitive), e.g. Karnataka",
+              "title": "State"
+            },
+            "description": "State/UT name (case-insensitive), e.g. Karnataka"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Envelope_list_dict__"
+                }
+              }
+            }
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Unprocessable Content"
+          },
+          "503": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Service Unavailable"
+          }
+        }
+      }
+    },
+    "/api/v1/states": {
+      "get": {
+        "tags": [
+          "states"
+        ],
+        "summary": "State table with rankings (paginated)",
+        "operationId": "list_states_api_v1_states_get",
+        "parameters": [
+          {
+            "name": "sort",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "enum": [
+                "bev",
+                "ev_share_pct",
+                "yoy_growth_pct",
+                "public_chargers",
+                "bev_per_charger",
+                "state_name",
+                "total_registrations"
+              ],
+              "type": "string",
+              "default": "bev",
+              "title": "Sort"
+            }
+          },
+          {
+            "name": "order",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "enum": [
+                "asc",
+                "desc"
+              ],
+              "type": "string",
+              "default": "desc",
+              "title": "Order"
+            }
+          },
+          {
+            "name": "search",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "maxLength": 80
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Search"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "default": 1,
+              "title": "Page"
+            }
+          },
+          {
+            "name": "page_size",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "maximum": 100,
+              "minimum": 1,
+              "default": 50,
+              "title": "Page Size"
+            }
+          },
+          {
+            "name": "start",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "pattern": "^\\d{4}-(0[1-9]|1[0-2])$"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "First month, YYYY-MM (default: first available)",
+              "examples": [
+                "2024-01"
+              ],
+              "title": "Start"
+            },
+            "description": "First month, YYYY-MM (default: first available)"
+          },
+          {
+            "name": "end",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "pattern": "^\\d{4}-(0[1-9]|1[0-2])$"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Last month, YYYY-MM (default: latest available)",
+              "examples": [
+                "2026-09"
+              ],
+              "title": "End"
+            },
+            "description": "Last month, YYYY-MM (default: latest available)"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Envelope_StatesData_"
+                }
+              }
+            }
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Unprocessable Content"
+          },
+          "503": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Service Unavailable"
+          }
+        }
+      }
+    },
+    "/api/v1/states/{state_name}": {
+      "get": {
+        "tags": [
+          "states"
+        ],
+        "summary": "Detail for one state",
+        "operationId": "get_state_api_v1_states__state_name__get",
+        "parameters": [
+          {
+            "name": "state_name",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "maxLength": 80,
+              "title": "State Name"
+            }
+          },
+          {
+            "name": "start",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "pattern": "^\\d{4}-(0[1-9]|1[0-2])$"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "First month, YYYY-MM (default: first available)",
+              "examples": [
+                "2024-01"
+              ],
+              "title": "Start"
+            },
+            "description": "First month, YYYY-MM (default: first available)"
+          },
+          {
+            "name": "end",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "pattern": "^\\d{4}-(0[1-9]|1[0-2])$"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Last month, YYYY-MM (default: latest available)",
+              "examples": [
+                "2026-09"
+              ],
+              "title": "End"
+            },
+            "description": "Last month, YYYY-MM (default: latest available)"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Envelope_StateDetail_"
+                }
+              }
+            }
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Unprocessable Content"
+          },
+          "503": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Service Unavailable"
+          }
+        }
+      }
+    },
+    "/api/v1/segments": {
+      "get": {
+        "tags": [
+          "segments"
+        ],
+        "summary": "EV powertrain mix and all-fuel category context",
+        "operationId": "get_segments_api_v1_segments_get",
+        "parameters": [
+          {
+            "name": "start",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "pattern": "^\\d{4}-(0[1-9]|1[0-2])$"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "First month, YYYY-MM (default: first available)",
+              "examples": [
+                "2024-01"
+              ],
+              "title": "Start"
+            },
+            "description": "First month, YYYY-MM (default: first available)"
+          },
+          {
+            "name": "end",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "pattern": "^\\d{4}-(0[1-9]|1[0-2])$"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Last month, YYYY-MM (default: latest available)",
+              "examples": [
+                "2026-09"
+              ],
+              "title": "End"
+            },
+            "description": "Last month, YYYY-MM (default: latest available)"
+          },
+          {
+            "name": "state",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "maxLength": 80
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "State/UT name (case-insensitive), e.g. Karnataka",
+              "title": "State"
+            },
+            "description": "State/UT name (case-insensitive), e.g. Karnataka"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Envelope_Segments_"
+                }
+              }
+            }
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Unprocessable Content"
+          },
+          "503": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Service Unavailable"
+          }
+        }
+      }
+    },
+    "/api/v1/makers": {
+      "get": {
+        "tags": [
+          "makers"
+        ],
+        "summary": "Manufacturer rankings (all fuels) and name-identified EV makers",
+        "operationId": "get_makers_api_v1_makers_get",
+        "parameters": [
+          {
+            "name": "search",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "maxLength": 80
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Search"
+            }
+          },
+          {
+            "name": "ev_named_only",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "default": false,
+              "title": "Ev Named Only"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "default": 1,
+              "title": "Page"
+            }
+          },
+          {
+            "name": "page_size",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "maximum": 200,
+              "minimum": 1,
+              "default": 25,
+              "title": "Page Size"
+            }
+          },
+          {
+            "name": "start",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "pattern": "^\\d{4}-(0[1-9]|1[0-2])$"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "First month, YYYY-MM (default: first available)",
+              "examples": [
+                "2024-01"
+              ],
+              "title": "Start"
+            },
+            "description": "First month, YYYY-MM (default: first available)"
+          },
+          {
+            "name": "end",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "pattern": "^\\d{4}-(0[1-9]|1[0-2])$"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Last month, YYYY-MM (default: latest available)",
+              "examples": [
+                "2026-09"
+              ],
+              "title": "End"
+            },
+            "description": "Last month, YYYY-MM (default: latest available)"
+          },
+          {
+            "name": "state",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "maxLength": 80
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "State/UT name (case-insensitive), e.g. Karnataka",
+              "title": "State"
+            },
+            "description": "State/UT name (case-insensitive), e.g. Karnataka"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Envelope_Makers_"
+                }
+              }
+            }
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Unprocessable Content"
+          },
+          "503": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Service Unavailable"
+          }
+        }
+      }
+    },
+    "/api/v1/charging-gap": {
+      "get": {
+        "tags": [
+          "charging"
+        ],
+        "summary": "BEV registrations per public charging station",
+        "operationId": "get_charging_gap_api_v1_charging_gap_get",
+        "parameters": [
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "maximum": 36,
+              "minimum": 1,
+              "default": 36,
+              "title": "Limit"
+            }
+          },
+          {
+            "name": "start",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "pattern": "^\\d{4}-(0[1-9]|1[0-2])$"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "First month, YYYY-MM (default: first available)",
+              "examples": [
+                "2024-01"
+              ],
+              "title": "Start"
+            },
+            "description": "First month, YYYY-MM (default: first available)"
+          },
+          {
+            "name": "end",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "pattern": "^\\d{4}-(0[1-9]|1[0-2])$"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Last month, YYYY-MM (default: latest available)",
+              "examples": [
+                "2026-09"
+              ],
+              "title": "End"
+            },
+            "description": "Last month, YYYY-MM (default: latest available)"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Envelope_ChargingGap_"
+                }
+              }
+            }
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Unprocessable Content"
+          },
+          "503": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Service Unavailable"
+          }
+        }
+      }
+    },
+    "/api/v1/chargers/growth": {
+      "get": {
+        "tags": [
+          "charging"
+        ],
+        "summary": "OMC charger installations by financial year",
+        "operationId": "get_charger_growth_api_v1_chargers_growth_get",
+        "parameters": [
+          {
+            "name": "start",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "pattern": "^\\d{4}-(0[1-9]|1[0-2])$"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "First month, YYYY-MM (default: first available)",
+              "examples": [
+                "2024-01"
+              ],
+              "title": "Start"
+            },
+            "description": "First month, YYYY-MM (default: first available)"
+          },
+          {
+            "name": "end",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "pattern": "^\\d{4}-(0[1-9]|1[0-2])$"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Last month, YYYY-MM (default: latest available)",
+              "examples": [
+                "2026-09"
+              ],
+              "title": "End"
+            },
+            "description": "Last month, YYYY-MM (default: latest available)"
+          },
+          {
+            "name": "state",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "maxLength": 80
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "State/UT name (case-insensitive), e.g. Karnataka",
+              "title": "State"
+            },
+            "description": "State/UT name (case-insensitive), e.g. Karnataka"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Envelope_ChargerGrowth_"
+                }
+              }
+            }
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Unprocessable Content"
+          },
+          "503": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Service Unavailable"
+          }
+        }
+      }
+    },
+    "/api/v1/policy-events": {
+      "get": {
+        "tags": [
+          "policy"
+        ],
+        "summary": "Policy milestones",
+        "operationId": "get_policy_events_api_v1_policy_events_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Envelope_list_PolicyEvent__"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Unprocessable Content",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Service Unavailable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/policy": {
+      "get": {
+        "tags": [
+          "policy"
+        ],
+        "summary": "Monthly trend with before/after comparisons",
+        "operationId": "get_policy_api_v1_policy_get",
+        "parameters": [
+          {
+            "name": "window",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "maximum": 12,
+              "minimum": 3,
+              "description": "Months before and after",
+              "default": 6,
+              "title": "Window"
+            },
+            "description": "Months before and after"
+          },
+          {
+            "name": "event_id",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "maxLength": 40
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Event Id"
+            }
+          },
+          {
+            "name": "start",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "pattern": "^\\d{4}-(0[1-9]|1[0-2])$"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "First month, YYYY-MM (default: first available)",
+              "examples": [
+                "2024-01"
+              ],
+              "title": "Start"
+            },
+            "description": "First month, YYYY-MM (default: first available)"
+          },
+          {
+            "name": "end",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "pattern": "^\\d{4}-(0[1-9]|1[0-2])$"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Last month, YYYY-MM (default: latest available)",
+              "examples": [
+                "2026-09"
+              ],
+              "title": "End"
+            },
+            "description": "Last month, YYYY-MM (default: latest available)"
+          },
+          {
+            "name": "state",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "maxLength": 80
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "State/UT name (case-insensitive), e.g. Karnataka",
+              "title": "State"
+            },
+            "description": "State/UT name (case-insensitive), e.g. Karnataka"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Envelope_PolicyData_"
+                }
+              }
+            }
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Unprocessable Content"
+          },
+          "503": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Service Unavailable"
+          }
+        }
+      }
+    },
+    "/api/v1/insights": {
+      "get": {
+        "tags": [
+          "insights"
+        ],
+        "summary": "Programmatically generated insights",
+        "operationId": "get_insights_api_v1_insights_get",
+        "parameters": [
+          {
+            "name": "start",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "pattern": "^\\d{4}-(0[1-9]|1[0-2])$"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "First month, YYYY-MM (default: first available)",
+              "examples": [
+                "2024-01"
+              ],
+              "title": "Start"
+            },
+            "description": "First month, YYYY-MM (default: first available)"
+          },
+          {
+            "name": "end",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "pattern": "^\\d{4}-(0[1-9]|1[0-2])$"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Last month, YYYY-MM (default: latest available)",
+              "examples": [
+                "2026-09"
+              ],
+              "title": "End"
+            },
+            "description": "Last month, YYYY-MM (default: latest available)"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Envelope_list_Insight__"
+                }
+              }
+            }
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Unprocessable Content"
+          },
+          "503": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Service Unavailable"
+          }
+        }
+      }
+    },
+    "/api/v1/export": {
+      "get": {
+        "tags": [
+          "exports"
+        ],
+        "summary": "Download a dataset as CSV",
+        "operationId": "export_api_v1_export_get",
+        "parameters": [
+          {
+            "name": "dataset",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "enum": [
+                "trend",
+                "states",
+                "charging_gap",
+                "makers",
+                "powertrain",
+                "categories",
+                "chargers_growth",
+                "policy_comparison",
+                "insights"
+              ],
+              "type": "string",
+              "title": "Dataset"
+            }
+          },
+          {
+            "name": "start",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "pattern": "^\\d{4}-(0[1-9]|1[0-2])$"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "First month, YYYY-MM (default: first available)",
+              "examples": [
+                "2024-01"
+              ],
+              "title": "Start"
+            },
+            "description": "First month, YYYY-MM (default: first available)"
+          },
+          {
+            "name": "end",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "pattern": "^\\d{4}-(0[1-9]|1[0-2])$"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Last month, YYYY-MM (default: latest available)",
+              "examples": [
+                "2026-09"
+              ],
+              "title": "End"
+            },
+            "description": "Last month, YYYY-MM (default: latest available)"
+          },
+          {
+            "name": "state",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "maxLength": 80
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "State/UT name (case-insensitive), e.g. Karnataka",
+              "title": "State"
+            },
+            "description": "State/UT name (case-insensitive), e.g. Karnataka"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "text/csv": {}
+            }
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Unprocessable Content"
+          },
+          "503": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Service Unavailable"
+          }
+        }
+      }
+    },
+    "/api/v1/sources": {
+      "get": {
+        "tags": [
+          "sources"
+        ],
+        "summary": "Data sources, rules, methodology, last ETL run",
+        "operationId": "get_sources_api_v1_sources_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Envelope_SourcesData_"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Unprocessable Content",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Service Unavailable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/meta/states": {
+      "get": {
+        "tags": [
+          "sources"
+        ],
+        "summary": "States and union territories",
+        "operationId": "get_states_ref_api_v1_meta_states_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Envelope_list_StateRef__"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Unprocessable Content",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Service Unavailable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/health": {
+      "get": {
+        "tags": [
+          "health"
+        ],
+        "summary": "Health",
+        "operationId": "health_health_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Health"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Unprocessable Content",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Service Unavailable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Health"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "AllFuelMakers": {
+        "properties": {
+          "total_registrations": {
+            "type": "integer",
+            "title": "Total Registrations"
+          },
+          "maker_count": {
+            "type": "integer",
+            "title": "Maker Count"
+          },
+          "top10": {
+            "items": {
+              "$ref": "#/components/schemas/MakerRow"
+            },
+            "type": "array",
+            "title": "Top10"
+          },
+          "top5_share_pct": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Top5 Share Pct"
+          },
+          "top10_share_pct": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Top10 Share Pct"
+          }
+        },
+        "type": "object",
+        "required": [
+          "total_registrations",
+          "maker_count",
+          "top10",
+          "top5_share_pct",
+          "top10_share_pct"
+        ],
+        "title": "AllFuelMakers"
+      },
+      "CategoryBlock": {
+        "properties": {
+          "coverage": {
+            "$ref": "#/components/schemas/Window"
+          },
+          "available": {
+            "type": "boolean",
+            "title": "Available"
+          },
+          "reason": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Reason"
+          },
+          "states_included": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "States Included"
+          },
+          "period": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/Window"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "series": {
+            "items": {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            "type": "array",
+            "title": "Series"
+          },
+          "totals": {
+            "items": {
+              "$ref": "#/components/schemas/CategoryTotal"
+            },
+            "type": "array",
+            "title": "Totals"
+          },
+          "groups": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Groups",
+            "default": []
+          }
+        },
+        "type": "object",
+        "required": [
+          "coverage",
+          "available",
+          "reason",
+          "states_included",
+          "series",
+          "totals"
+        ],
+        "title": "CategoryBlock"
+      },
+      "CategoryTotal": {
+        "properties": {
+          "group": {
+            "type": "string",
+            "title": "Group"
+          },
+          "registrations": {
+            "type": "integer",
+            "title": "Registrations"
+          },
+          "share_pct": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Share Pct"
+          }
+        },
+        "type": "object",
+        "required": [
+          "group",
+          "registrations",
+          "share_pct"
+        ],
+        "title": "CategoryTotal"
+      },
+      "ChargerGrowth": {
+        "properties": {
+          "measure": {
+            "type": "string",
+            "title": "Measure"
+          },
+          "financial_years": {
+            "items": {
+              "$ref": "#/components/schemas/OmcYear"
+            },
+            "type": "array",
+            "title": "Financial Years"
+          },
+          "status": {
+            "$ref": "#/components/schemas/OmcStatus"
+          },
+          "by_state": {
+            "items": {
+              "$ref": "#/components/schemas/OmcStateRow"
+            },
+            "type": "array",
+            "title": "By State"
+          },
+          "notes": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Notes"
+          }
+        },
+        "type": "object",
+        "required": [
+          "measure",
+          "financial_years",
+          "status",
+          "by_state",
+          "notes"
+        ],
+        "title": "ChargerGrowth"
+      },
+      "ChargingGap": {
+        "properties": {
+          "national": {
+            "$ref": "#/components/schemas/GapNational"
+          },
+          "thresholds": {
+            "additionalProperties": {
+              "type": "number"
+            },
+            "type": "object",
+            "title": "Thresholds"
+          },
+          "states": {
+            "items": {
+              "$ref": "#/components/schemas/GapRow"
+            },
+            "type": "array",
+            "title": "States"
+          }
+        },
+        "type": "object",
+        "required": [
+          "national",
+          "thresholds",
+          "states"
+        ],
+        "title": "ChargingGap"
+      },
+      "Envelope_ChargerGrowth_": {
+        "properties": {
+          "data": {
+            "$ref": "#/components/schemas/ChargerGrowth"
+          },
+          "meta": {
+            "$ref": "#/components/schemas/Meta"
+          }
+        },
+        "type": "object",
+        "required": [
+          "data",
+          "meta"
+        ],
+        "title": "Envelope[ChargerGrowth]"
+      },
+      "Envelope_ChargingGap_": {
+        "properties": {
+          "data": {
+            "$ref": "#/components/schemas/ChargingGap"
+          },
+          "meta": {
+            "$ref": "#/components/schemas/Meta"
+          }
+        },
+        "type": "object",
+        "required": [
+          "data",
+          "meta"
+        ],
+        "title": "Envelope[ChargingGap]"
+      },
+      "Envelope_Makers_": {
+        "properties": {
+          "data": {
+            "$ref": "#/components/schemas/Makers"
+          },
+          "meta": {
+            "$ref": "#/components/schemas/Meta"
+          }
+        },
+        "type": "object",
+        "required": [
+          "data",
+          "meta"
+        ],
+        "title": "Envelope[Makers]"
+      },
+      "Envelope_Overview_": {
+        "properties": {
+          "data": {
+            "$ref": "#/components/schemas/Overview"
+          },
+          "meta": {
+            "$ref": "#/components/schemas/Meta"
+          }
+        },
+        "type": "object",
+        "required": [
+          "data",
+          "meta"
+        ],
+        "title": "Envelope[Overview]"
+      },
+      "Envelope_PolicyData_": {
+        "properties": {
+          "data": {
+            "$ref": "#/components/schemas/PolicyData"
+          },
+          "meta": {
+            "$ref": "#/components/schemas/Meta"
+          }
+        },
+        "type": "object",
+        "required": [
+          "data",
+          "meta"
+        ],
+        "title": "Envelope[PolicyData]"
+      },
+      "Envelope_Segments_": {
+        "properties": {
+          "data": {
+            "$ref": "#/components/schemas/Segments"
+          },
+          "meta": {
+            "$ref": "#/components/schemas/Meta"
+          }
+        },
+        "type": "object",
+        "required": [
+          "data",
+          "meta"
+        ],
+        "title": "Envelope[Segments]"
+      },
+      "Envelope_SourcesData_": {
+        "properties": {
+          "data": {
+            "$ref": "#/components/schemas/SourcesData"
+          },
+          "meta": {
+            "$ref": "#/components/schemas/Meta"
+          }
+        },
+        "type": "object",
+        "required": [
+          "data",
+          "meta"
+        ],
+        "title": "Envelope[SourcesData]"
+      },
+      "Envelope_StateDetail_": {
+        "properties": {
+          "data": {
+            "$ref": "#/components/schemas/StateDetail"
+          },
+          "meta": {
+            "$ref": "#/components/schemas/Meta"
+          }
+        },
+        "type": "object",
+        "required": [
+          "data",
+          "meta"
+        ],
+        "title": "Envelope[StateDetail]"
+      },
+      "Envelope_StatesData_": {
+        "properties": {
+          "data": {
+            "$ref": "#/components/schemas/StatesData"
+          },
+          "meta": {
+            "$ref": "#/components/schemas/Meta"
+          }
+        },
+        "type": "object",
+        "required": [
+          "data",
+          "meta"
+        ],
+        "title": "Envelope[StatesData]"
+      },
+      "Envelope_list_Insight__": {
+        "properties": {
+          "data": {
+            "items": {
+              "$ref": "#/components/schemas/Insight"
+            },
+            "type": "array",
+            "title": "Data"
+          },
+          "meta": {
+            "$ref": "#/components/schemas/Meta"
+          }
+        },
+        "type": "object",
+        "required": [
+          "data",
+          "meta"
+        ],
+        "title": "Envelope[list[Insight]]"
+      },
+      "Envelope_list_PolicyEvent__": {
+        "properties": {
+          "data": {
+            "items": {
+              "$ref": "#/components/schemas/PolicyEvent"
+            },
+            "type": "array",
+            "title": "Data"
+          },
+          "meta": {
+            "$ref": "#/components/schemas/Meta"
+          }
+        },
+        "type": "object",
+        "required": [
+          "data",
+          "meta"
+        ],
+        "title": "Envelope[list[PolicyEvent]]"
+      },
+      "Envelope_list_StateRef__": {
+        "properties": {
+          "data": {
+            "items": {
+              "$ref": "#/components/schemas/StateRef"
+            },
+            "type": "array",
+            "title": "Data"
+          },
+          "meta": {
+            "$ref": "#/components/schemas/Meta"
+          }
+        },
+        "type": "object",
+        "required": [
+          "data",
+          "meta"
+        ],
+        "title": "Envelope[list[StateRef]]"
+      },
+      "Envelope_list_dict__": {
+        "properties": {
+          "data": {
+            "items": {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            "type": "array",
+            "title": "Data"
+          },
+          "meta": {
+            "$ref": "#/components/schemas/Meta"
+          }
+        },
+        "type": "object",
+        "required": [
+          "data",
+          "meta"
+        ],
+        "title": "Envelope[list[dict]]"
+      },
+      "ErrorBody": {
+        "properties": {
+          "code": {
+            "type": "string",
+            "title": "Code"
+          },
+          "message": {
+            "type": "string",
+            "title": "Message"
+          }
+        },
+        "type": "object",
+        "required": [
+          "code",
+          "message"
+        ],
+        "title": "ErrorBody"
+      },
+      "ErrorResponse": {
+        "properties": {
+          "error": {
+            "$ref": "#/components/schemas/ErrorBody"
+          }
+        },
+        "type": "object",
+        "required": [
+          "error"
+        ],
+        "title": "ErrorResponse"
+      },
+      "EvNamedMakers": {
+        "properties": {
+          "definition": {
+            "type": "string",
+            "title": "Definition"
+          },
+          "maker_count": {
+            "type": "integer",
+            "title": "Maker Count"
+          },
+          "total_registrations": {
+            "type": "integer",
+            "title": "Total Registrations"
+          },
+          "bev_registrations_fuel_source": {
+            "type": "integer",
+            "title": "Bev Registrations Fuel Source"
+          },
+          "coverage_of_bev_pct": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Coverage Of Bev Pct"
+          },
+          "top10": {
+            "items": {
+              "$ref": "#/components/schemas/MakerRow"
+            },
+            "type": "array",
+            "title": "Top10"
+          }
+        },
+        "type": "object",
+        "required": [
+          "definition",
+          "maker_count",
+          "total_registrations",
+          "bev_registrations_fuel_source",
+          "coverage_of_bev_pct",
+          "top10"
+        ],
+        "title": "EvNamedMakers"
+      },
+      "GapNational": {
+        "properties": {
+          "bev": {
+            "type": "integer",
+            "title": "Bev"
+          },
+          "public_chargers": {
+            "type": "integer",
+            "title": "Public Chargers"
+          },
+          "bev_per_charger": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Bev Per Charger"
+          }
+        },
+        "type": "object",
+        "required": [
+          "bev",
+          "public_chargers",
+          "bev_per_charger"
+        ],
+        "title": "GapNational"
+      },
+      "GapRow": {
+        "properties": {
+          "state_name": {
+            "type": "string",
+            "title": "State Name"
+          },
+          "state_code": {
+            "type": "string",
+            "title": "State Code"
+          },
+          "bev": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Bev"
+          },
+          "public_chargers": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Public Chargers"
+          },
+          "bev_per_charger": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Bev Per Charger"
+          },
+          "relative_to_national": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Relative To National"
+          },
+          "pressure_tier": {
+            "anyOf": [
+              {
+                "type": "string",
+                "enum": [
+                  "high",
+                  "elevated",
+                  "typical"
+                ]
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Pressure Tier"
+          },
+          "small_charger_base": {
+            "type": "boolean",
+            "title": "Small Charger Base"
+          },
+          "rankable": {
+            "type": "boolean",
+            "title": "Rankable"
+          },
+          "unrankable_reason": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Unrankable Reason"
+          },
+          "rank": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Rank"
+          }
+        },
+        "type": "object",
+        "required": [
+          "state_name",
+          "state_code",
+          "bev",
+          "public_chargers",
+          "bev_per_charger",
+          "relative_to_national",
+          "pressure_tier",
+          "small_charger_base",
+          "rankable",
+          "unrankable_reason",
+          "rank"
+        ],
+        "title": "GapRow"
+      },
+      "Health": {
+        "properties": {
+          "status": {
+            "type": "string",
+            "enum": [
+              "ok",
+              "degraded"
+            ],
+            "title": "Status"
+          },
+          "database": {
+            "type": "string",
+            "enum": [
+              "ok",
+              "unavailable"
+            ],
+            "title": "Database"
+          },
+          "last_successful_etl": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Last Successful Etl"
+          },
+          "version": {
+            "type": "string",
+            "title": "Version"
+          }
+        },
+        "type": "object",
+        "required": [
+          "status",
+          "database",
+          "version"
+        ],
+        "title": "Health"
+      },
+      "Insight": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "title": "Id"
+          },
+          "kind": {
+            "type": "string",
+            "enum": [
+              "observation",
+              "recommendation"
+            ],
+            "title": "Kind"
+          },
+          "category": {
+            "type": "string",
+            "title": "Category"
+          },
+          "title": {
+            "type": "string",
+            "title": "Title"
+          },
+          "statement": {
+            "type": "string",
+            "title": "Statement"
+          },
+          "metric": {
+            "$ref": "#/components/schemas/InsightMetric"
+          },
+          "period": {
+            "additionalProperties": true,
+            "type": "object",
+            "title": "Period"
+          },
+          "sources": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Sources"
+          },
+          "reasoning": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Reasoning"
+          },
+          "based_on": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Based On"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "kind",
+          "category",
+          "title",
+          "statement",
+          "metric",
+          "period",
+          "sources",
+          "reasoning",
+          "based_on"
+        ],
+        "title": "Insight"
+      },
+      "InsightMetric": {
+        "properties": {
+          "name": {
+            "type": "string",
+            "title": "Name"
+          },
+          "value": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Value"
+          },
+          "unit": {
+            "type": "string",
+            "title": "Unit"
+          }
+        },
+        "type": "object",
+        "required": [
+          "name",
+          "value",
+          "unit"
+        ],
+        "title": "InsightMetric"
+      },
+      "Kpis": {
+        "properties": {
+          "bev_registrations": {
+            "type": "integer",
+            "title": "Bev Registrations"
+          },
+          "total_registrations": {
+            "type": "integer",
+            "title": "Total Registrations"
+          },
+          "ev_share_pct": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Ev Share Pct"
+          },
+          "yoy": {
+            "$ref": "#/components/schemas/YoY"
+          },
+          "public_chargers": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Public Chargers"
+          },
+          "charger_snapshot": {
+            "type": "string",
+            "title": "Charger Snapshot"
+          },
+          "months": {
+            "type": "integer",
+            "title": "Months"
+          }
+        },
+        "type": "object",
+        "required": [
+          "bev_registrations",
+          "total_registrations",
+          "ev_share_pct",
+          "yoy",
+          "public_chargers",
+          "charger_snapshot",
+          "months"
+        ],
+        "title": "Kpis"
+      },
+      "MakerRow": {
+        "properties": {
+          "maker": {
+            "type": "string",
+            "title": "Maker"
+          },
+          "name_identified_ev_maker": {
+            "type": "boolean",
+            "title": "Name Identified Ev Maker"
+          },
+          "registrations": {
+            "type": "integer",
+            "title": "Registrations"
+          },
+          "rank": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Rank"
+          },
+          "share_of_all_registrations_pct": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Share Of All Registrations Pct"
+          },
+          "rank_within_ev_named": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Rank Within Ev Named"
+          },
+          "share_within_ev_named_pct": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Share Within Ev Named Pct"
+          }
+        },
+        "type": "object",
+        "required": [
+          "maker",
+          "name_identified_ev_maker",
+          "registrations"
+        ],
+        "title": "MakerRow"
+      },
+      "Makers": {
+        "properties": {
+          "ev_market_share_supported": {
+            "type": "boolean",
+            "title": "Ev Market Share Supported"
+          },
+          "ev_market_share_reason": {
+            "type": "string",
+            "title": "Ev Market Share Reason"
+          },
+          "all_fuel": {
+            "$ref": "#/components/schemas/AllFuelMakers"
+          },
+          "ev_named": {
+            "$ref": "#/components/schemas/EvNamedMakers"
+          },
+          "table": {
+            "$ref": "#/components/schemas/Page_MakerRow_"
+          }
+        },
+        "type": "object",
+        "required": [
+          "ev_market_share_supported",
+          "ev_market_share_reason",
+          "all_fuel",
+          "ev_named",
+          "table"
+        ],
+        "title": "Makers"
+      },
+      "MapPoint": {
+        "properties": {
+          "state_name": {
+            "type": "string",
+            "title": "State Name"
+          },
+          "ev_share_pct": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Ev Share Pct"
+          },
+          "bev": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Bev"
+          },
+          "share_rankable": {
+            "type": "boolean",
+            "title": "Share Rankable"
+          }
+        },
+        "type": "object",
+        "required": [
+          "state_name",
+          "ev_share_pct",
+          "bev",
+          "share_rankable"
+        ],
+        "title": "MapPoint"
+      },
+      "Meta": {
+        "properties": {
+          "period": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/PeriodOut"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "sources": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Sources",
+            "description": "data_sources.source_key values used"
+          },
+          "notes": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Notes",
+            "default": []
+          },
+          "data_coverage": {
+            "$ref": "#/components/schemas/PeriodOut"
+          },
+          "last_processed_at": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Last Processed At"
+          }
+        },
+        "additionalProperties": true,
+        "type": "object",
+        "required": [
+          "sources",
+          "data_coverage"
+        ],
+        "title": "Meta"
+      },
+      "MonthPoint": {
+        "properties": {
+          "month": {
+            "type": "string",
+            "title": "Month"
+          },
+          "bev": {
+            "type": "integer",
+            "title": "Bev"
+          },
+          "strong_hybrid": {
+            "type": "integer",
+            "title": "Strong Hybrid"
+          },
+          "plugin_hybrid": {
+            "type": "integer",
+            "title": "Plugin Hybrid"
+          },
+          "fcev": {
+            "type": "integer",
+            "title": "Fcev"
+          },
+          "other_hybrid": {
+            "type": "integer",
+            "title": "Other Hybrid"
+          },
+          "total": {
+            "type": "integer",
+            "title": "Total"
+          },
+          "ev_share_pct": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Ev Share Pct"
+          },
+          "bev_prev_year": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Bev Prev Year"
+          },
+          "bev_yoy_pct": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Bev Yoy Pct"
+          },
+          "ev_share_prev_year_pct": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Ev Share Prev Year Pct"
+          }
+        },
+        "type": "object",
+        "required": [
+          "month",
+          "bev",
+          "strong_hybrid",
+          "plugin_hybrid",
+          "fcev",
+          "other_hybrid",
+          "total",
+          "ev_share_pct",
+          "bev_prev_year",
+          "bev_yoy_pct",
+          "ev_share_prev_year_pct"
+        ],
+        "title": "MonthPoint"
+      },
+      "OmcStateRow": {
+        "properties": {
+          "state_name": {
+            "type": "string",
+            "title": "State Name"
+          },
+          "total_installed": {
+            "type": "integer",
+            "title": "Total Installed"
+          },
+          "total_operational": {
+            "type": "integer",
+            "title": "Total Operational"
+          },
+          "decommissioned": {
+            "type": "integer",
+            "title": "Decommissioned"
+          }
+        },
+        "type": "object",
+        "required": [
+          "state_name",
+          "total_installed",
+          "total_operational",
+          "decommissioned"
+        ],
+        "title": "OmcStateRow"
+      },
+      "OmcStatus": {
+        "properties": {
+          "decommissioned": {
+            "type": "integer",
+            "title": "Decommissioned"
+          },
+          "total_installed": {
+            "type": "integer",
+            "title": "Total Installed"
+          },
+          "total_operational": {
+            "type": "integer",
+            "title": "Total Operational"
+          }
+        },
+        "type": "object",
+        "required": [
+          "decommissioned",
+          "total_installed",
+          "total_operational"
+        ],
+        "title": "OmcStatus"
+      },
+      "OmcYear": {
+        "properties": {
+          "fy_label": {
+            "type": "string",
+            "title": "Fy Label"
+          },
+          "fy_order": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Fy Order"
+          },
+          "is_partial_year": {
+            "type": "boolean",
+            "title": "Is Partial Year"
+          },
+          "installed": {
+            "type": "integer",
+            "title": "Installed"
+          },
+          "cumulative_installed": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Cumulative Installed"
+          },
+          "growth_pct": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Growth Pct"
+          }
+        },
+        "type": "object",
+        "required": [
+          "fy_label",
+          "is_partial_year",
+          "installed"
+        ],
+        "title": "OmcYear"
+      },
+      "Overview": {
+        "properties": {
+          "kpis": {
+            "$ref": "#/components/schemas/Kpis"
+          },
+          "latest_month": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/MonthPoint"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "trend": {
+            "items": {
+              "$ref": "#/components/schemas/MonthPoint"
+            },
+            "type": "array",
+            "title": "Trend"
+          },
+          "map": {
+            "items": {
+              "$ref": "#/components/schemas/MapPoint"
+            },
+            "type": "array",
+            "title": "Map"
+          },
+          "top_states_by_bev": {
+            "items": {
+              "$ref": "#/components/schemas/TopState"
+            },
+            "type": "array",
+            "title": "Top States By Bev"
+          },
+          "top_states_by_share": {
+            "items": {
+              "$ref": "#/components/schemas/TopState"
+            },
+            "type": "array",
+            "title": "Top States By Share"
+          },
+          "powertrain": {
+            "$ref": "#/components/schemas/Powertrain"
+          },
+          "selected_state": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Selected State"
+          }
+        },
+        "type": "object",
+        "required": [
+          "kpis",
+          "latest_month",
+          "trend",
+          "map",
+          "top_states_by_bev",
+          "top_states_by_share",
+          "powertrain",
+          "selected_state"
+        ],
+        "title": "Overview"
+      },
+      "Page_MakerRow_": {
+        "properties": {
+          "rows": {
+            "items": {
+              "$ref": "#/components/schemas/MakerRow"
+            },
+            "type": "array",
+            "title": "Rows"
+          },
+          "page": {
+            "type": "integer",
+            "title": "Page"
+          },
+          "page_size": {
+            "type": "integer",
+            "title": "Page Size"
+          },
+          "total_rows": {
+            "type": "integer",
+            "title": "Total Rows"
+          }
+        },
+        "type": "object",
+        "required": [
+          "rows",
+          "page",
+          "page_size",
+          "total_rows"
+        ],
+        "title": "Page[MakerRow]"
+      },
+      "Page_StateRow_": {
+        "properties": {
+          "rows": {
+            "items": {
+              "$ref": "#/components/schemas/StateRow"
+            },
+            "type": "array",
+            "title": "Rows"
+          },
+          "page": {
+            "type": "integer",
+            "title": "Page"
+          },
+          "page_size": {
+            "type": "integer",
+            "title": "Page Size"
+          },
+          "total_rows": {
+            "type": "integer",
+            "title": "Total Rows"
+          }
+        },
+        "type": "object",
+        "required": [
+          "rows",
+          "page",
+          "page_size",
+          "total_rows"
+        ],
+        "title": "Page[StateRow]"
+      },
+      "PeriodOut": {
+        "properties": {
+          "start": {
+            "type": "string",
+            "title": "Start",
+            "examples": [
+              "2022-01"
+            ]
+          },
+          "end": {
+            "type": "string",
+            "title": "End",
+            "examples": [
+              "2026-09"
+            ]
+          },
+          "months": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Months"
+          }
+        },
+        "type": "object",
+        "required": [
+          "start",
+          "end"
+        ],
+        "title": "PeriodOut"
+      },
+      "PolicyComparison": {
+        "properties": {
+          "anchor_id": {
+            "type": "string",
+            "title": "Anchor Id"
+          },
+          "event_id": {
+            "type": "string",
+            "title": "Event Id"
+          },
+          "event_ids": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Event Ids"
+          },
+          "label": {
+            "type": "string",
+            "title": "Label"
+          },
+          "anchor_month": {
+            "type": "string",
+            "title": "Anchor Month"
+          },
+          "window_months": {
+            "type": "integer",
+            "title": "Window Months"
+          },
+          "before": {
+            "$ref": "#/components/schemas/Window"
+          },
+          "after": {
+            "$ref": "#/components/schemas/Window"
+          },
+          "available": {
+            "type": "boolean",
+            "title": "Available"
+          },
+          "unavailable_reason": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Unavailable Reason"
+          },
+          "before_avg_monthly_bev": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Before Avg Monthly Bev"
+          },
+          "after_avg_monthly_bev": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "After Avg Monthly Bev"
+          },
+          "change_pct": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Change Pct"
+          },
+          "before_ev_share_pct": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Before Ev Share Pct"
+          },
+          "after_ev_share_pct": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "After Ev Share Pct"
+          },
+          "share_change_pp": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Share Change Pp"
+          },
+          "after_vs_same_months_prior_year_pct": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "After Vs Same Months Prior Year Pct"
+          },
+          "prior_year_window": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/Window"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "type": "object",
+        "required": [
+          "anchor_id",
+          "event_id",
+          "event_ids",
+          "label",
+          "anchor_month",
+          "window_months",
+          "before",
+          "after",
+          "available"
+        ],
+        "title": "PolicyComparison"
+      },
+      "PolicyData": {
+        "properties": {
+          "events": {
+            "items": {
+              "$ref": "#/components/schemas/PolicyEvent"
+            },
+            "type": "array",
+            "title": "Events"
+          },
+          "comparisons": {
+            "items": {
+              "$ref": "#/components/schemas/PolicyComparison"
+            },
+            "type": "array",
+            "title": "Comparisons"
+          },
+          "trend": {
+            "items": {
+              "$ref": "#/components/schemas/MonthPoint"
+            },
+            "type": "array",
+            "title": "Trend"
+          },
+          "caveats": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Caveats"
+          }
+        },
+        "type": "object",
+        "required": [
+          "events",
+          "comparisons",
+          "trend",
+          "caveats"
+        ],
+        "title": "PolicyData"
+      },
+      "PolicyEvent": {
+        "properties": {
+          "event_id": {
+            "type": "string",
+            "title": "Event Id"
+          },
+          "name": {
+            "type": "string",
+            "title": "Name"
+          },
+          "short_name": {
+            "type": "string",
+            "title": "Short Name"
+          },
+          "start_date": {
+            "type": "string",
+            "title": "Start Date"
+          },
+          "end_date": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "End Date"
+          },
+          "event_type": {
+            "type": "string",
+            "title": "Event Type"
+          },
+          "description": {
+            "type": "string",
+            "title": "Description"
+          },
+          "source": {
+            "type": "string",
+            "title": "Source"
+          }
+        },
+        "type": "object",
+        "required": [
+          "event_id",
+          "name",
+          "short_name",
+          "start_date",
+          "end_date",
+          "event_type",
+          "description",
+          "source"
+        ],
+        "title": "PolicyEvent"
+      },
+      "Powertrain": {
+        "properties": {
+          "bev": {
+            "type": "integer",
+            "title": "Bev"
+          },
+          "strong_hybrid": {
+            "type": "integer",
+            "title": "Strong Hybrid"
+          },
+          "plugin_hybrid": {
+            "type": "integer",
+            "title": "Plugin Hybrid"
+          },
+          "fcev": {
+            "type": "integer",
+            "title": "Fcev"
+          },
+          "other_hybrid": {
+            "type": "integer",
+            "title": "Other Hybrid"
+          }
+        },
+        "type": "object",
+        "required": [
+          "bev",
+          "strong_hybrid",
+          "plugin_hybrid",
+          "fcev",
+          "other_hybrid"
+        ],
+        "title": "Powertrain"
+      },
+      "PowertrainBlock": {
+        "properties": {
+          "series": {
+            "items": {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            "type": "array",
+            "title": "Series"
+          },
+          "totals": {
+            "items": {
+              "$ref": "#/components/schemas/PowertrainTotal"
+            },
+            "type": "array",
+            "title": "Totals"
+          }
+        },
+        "type": "object",
+        "required": [
+          "series",
+          "totals"
+        ],
+        "title": "PowertrainBlock"
+      },
+      "PowertrainTotal": {
+        "properties": {
+          "key": {
+            "type": "string",
+            "title": "Key"
+          },
+          "label": {
+            "type": "string",
+            "title": "Label"
+          },
+          "registrations": {
+            "type": "integer",
+            "title": "Registrations"
+          },
+          "share_pct": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Share Pct"
+          }
+        },
+        "type": "object",
+        "required": [
+          "key",
+          "label",
+          "registrations",
+          "share_pct"
+        ],
+        "title": "PowertrainTotal"
+      },
+      "Segments": {
+        "properties": {
+          "ev_category_split_supported": {
+            "type": "boolean",
+            "title": "Ev Category Split Supported"
+          },
+          "ev_category_split_reason": {
+            "type": "string",
+            "title": "Ev Category Split Reason"
+          },
+          "powertrain": {
+            "$ref": "#/components/schemas/PowertrainBlock"
+          },
+          "all_fuel_categories": {
+            "$ref": "#/components/schemas/CategoryBlock"
+          }
+        },
+        "type": "object",
+        "required": [
+          "ev_category_split_supported",
+          "ev_category_split_reason",
+          "powertrain",
+          "all_fuel_categories"
+        ],
+        "title": "Segments"
+      },
+      "SourcesData": {
+        "properties": {
+          "sources": {
+            "items": {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            "type": "array",
+            "title": "Sources"
+          },
+          "classification": {
+            "additionalProperties": true,
+            "type": "object",
+            "title": "Classification"
+          },
+          "quality_rules": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Quality Rules"
+          },
+          "methodology": {
+            "items": {
+              "additionalProperties": {
+                "type": "string"
+              },
+              "type": "object"
+            },
+            "type": "array",
+            "title": "Methodology"
+          },
+          "last_run": {
+            "anyOf": [
+              {
+                "additionalProperties": true,
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Last Run"
+          }
+        },
+        "type": "object",
+        "required": [
+          "sources",
+          "classification",
+          "quality_rules",
+          "methodology",
+          "last_run"
+        ],
+        "title": "SourcesData"
+      },
+      "StateDetail": {
+        "properties": {
+          "summary": {
+            "$ref": "#/components/schemas/StateRow"
+          },
+          "national_ev_share_pct": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "National Ev Share Pct"
+          },
+          "trend": {
+            "items": {
+              "$ref": "#/components/schemas/MonthPoint"
+            },
+            "type": "array",
+            "title": "Trend"
+          },
+          "powertrain": {
+            "$ref": "#/components/schemas/Powertrain"
+          },
+          "yoy": {
+            "$ref": "#/components/schemas/YoY"
+          },
+          "top_makers_all_fuels": {
+            "items": {
+              "$ref": "#/components/schemas/MakerRow"
+            },
+            "type": "array",
+            "title": "Top Makers All Fuels"
+          },
+          "omc_installations": {
+            "items": {
+              "$ref": "#/components/schemas/OmcYear"
+            },
+            "type": "array",
+            "title": "Omc Installations"
+          }
+        },
+        "type": "object",
+        "required": [
+          "summary",
+          "national_ev_share_pct",
+          "trend",
+          "powertrain",
+          "yoy",
+          "top_makers_all_fuels",
+          "omc_installations"
+        ],
+        "title": "StateDetail"
+      },
+      "StateRef": {
+        "properties": {
+          "state_name": {
+            "type": "string",
+            "title": "State Name"
+          },
+          "state_code": {
+            "type": "string",
+            "title": "State Code"
+          },
+          "state_type": {
+            "type": "string",
+            "title": "State Type"
+          },
+          "region": {
+            "type": "string",
+            "title": "Region"
+          }
+        },
+        "type": "object",
+        "required": [
+          "state_name",
+          "state_code",
+          "state_type",
+          "region"
+        ],
+        "title": "StateRef"
+      },
+      "StateRow": {
+        "properties": {
+          "state_name": {
+            "type": "string",
+            "title": "State Name"
+          },
+          "state_code": {
+            "type": "string",
+            "title": "State Code"
+          },
+          "state_type": {
+            "type": "string",
+            "title": "State Type"
+          },
+          "region": {
+            "type": "string",
+            "title": "Region"
+          },
+          "bev": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Bev"
+          },
+          "total_registrations": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Total Registrations"
+          },
+          "ev_share_pct": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Ev Share Pct"
+          },
+          "strong_hybrid": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Strong Hybrid"
+          },
+          "bev_last_12m": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Bev Last 12M"
+          },
+          "bev_prev_12m": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Bev Prev 12M"
+          },
+          "yoy_growth_pct": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Yoy Growth Pct"
+          },
+          "public_chargers": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Public Chargers"
+          },
+          "bev_per_charger": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Bev Per Charger"
+          },
+          "share_rankable": {
+            "type": "boolean",
+            "title": "Share Rankable"
+          },
+          "growth_rankable": {
+            "type": "boolean",
+            "title": "Growth Rankable"
+          },
+          "rank_bev": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Rank Bev"
+          },
+          "rank_share": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Rank Share"
+          },
+          "rank_growth": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Rank Growth"
+          }
+        },
+        "type": "object",
+        "required": [
+          "state_name",
+          "state_code",
+          "state_type",
+          "region",
+          "bev",
+          "total_registrations",
+          "ev_share_pct",
+          "bev_last_12m",
+          "bev_prev_12m",
+          "yoy_growth_pct",
+          "public_chargers",
+          "bev_per_charger",
+          "share_rankable",
+          "growth_rankable",
+          "rank_bev",
+          "rank_share",
+          "rank_growth"
+        ],
+        "title": "StateRow"
+      },
+      "StatesData": {
+        "properties": {
+          "national": {
+            "additionalProperties": true,
+            "type": "object",
+            "title": "National"
+          },
+          "table": {
+            "$ref": "#/components/schemas/Page_StateRow_"
+          }
+        },
+        "type": "object",
+        "required": [
+          "national",
+          "table"
+        ],
+        "title": "StatesData"
+      },
+      "TopState": {
+        "properties": {
+          "state_name": {
+            "type": "string",
+            "title": "State Name"
+          },
+          "value": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Value"
+          },
+          "bev": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Bev"
+          },
+          "share_of_national_pct": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Share Of National Pct"
+          }
+        },
+        "type": "object",
+        "required": [
+          "state_name",
+          "value"
+        ],
+        "title": "TopState"
+      },
+      "Window": {
+        "properties": {
+          "start": {
+            "type": "string",
+            "title": "Start"
+          },
+          "end": {
+            "type": "string",
+            "title": "End"
+          }
+        },
+        "type": "object",
+        "required": [
+          "start",
+          "end"
+        ],
+        "title": "Window"
+      },
+      "YoY": {
+        "properties": {
+          "window": {
+            "$ref": "#/components/schemas/YoYWindow"
+          },
+          "bev_current": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Bev Current"
+          },
+          "bev_previous": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Bev Previous"
+          },
+          "growth_pct": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Growth Pct"
+          },
+          "ev_share_current_pct": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Ev Share Current Pct"
+          },
+          "ev_share_previous_pct": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Ev Share Previous Pct"
+          },
+          "share_change_pp": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Share Change Pp"
+          },
+          "unavailable_reason": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Unavailable Reason"
+          }
+        },
+        "type": "object",
+        "required": [
+          "window",
+          "bev_current",
+          "bev_previous",
+          "growth_pct",
+          "ev_share_current_pct",
+          "ev_share_previous_pct",
+          "share_change_pp"
+        ],
+        "title": "YoY"
+      },
+      "YoYWindow": {
+        "properties": {
+          "current": {
+            "$ref": "#/components/schemas/Window"
+          },
+          "previous": {
+            "$ref": "#/components/schemas/Window"
+          },
+          "available": {
+            "type": "boolean",
+            "title": "Available"
+          }
+        },
+        "type": "object",
+        "required": [
+          "current",
+          "previous",
+          "available"
+        ],
+        "title": "YoYWindow"
+      }
+    }
+  }
+}
